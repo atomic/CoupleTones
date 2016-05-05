@@ -3,6 +3,7 @@ package cse110.team17.coupletones;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,10 +25,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
+    private static final float defaultZoom = 14.0f;
+
     private GoogleMap mMap;
+    private SharedPreferences sharedPrefs;
+    private ArrayList<Marker> markers;
+    private boolean isMapCentered = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Marker marker = mMap.addMarker(new MarkerOptions()
                                 .position(point)
                                 .title(title));
+                        markers.add(marker);
+
+                        // save the marker
+                        SharedPreferences.Editor editor = sharedPrefs.edit();
+
+                        editor.putInt("numLocations", markers.size());
+
+                        // index of last element (marker just added)
+                        int i = markers.size() - 1;
+                        editor.putFloat("lat" + i, (float) point.latitude);
+                        editor.putFloat("lon" + i, (float) point.longitude);
+                        editor.putString("title" + i, title);
+
+                        editor.commit();
                     }
                 });
 
@@ -67,28 +89,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 });
 
         alertDialog.show();
-
-
     }
 
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera. In this case,
-         * we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to install
-         * it inside the SupportMapFragment. This method will only be triggered once the user has
-         * installed Google Play services and returned to the app.
-         */
+    /**
+     * Manipulates the map once available.
+     * This callback is triggered when the map is ready to be used.
+     * This is where we can add markers or lines, add listeners or move the camera. In this case,
+     * we just add a marker near Sydney, Australia.
+     * If Google Play services is not installed on the device, the user will be prompted to install
+     * it inside the SupportMapFragment. This method will only be triggered once the user has
+     * installed Google Play services and returned to the app.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        markers = new ArrayList<>();
+
+        // load the saved locations
+        sharedPrefs = getSharedPreferences("location", 0);
+        int numLocations = sharedPrefs.getInt("numLocations", 0);
+        if (numLocations > 0) {
+            for (int i = 0; i < numLocations; i++) {
+                double lat = (double) sharedPrefs.getFloat("lat" + i, 0);
+                double lon = (double) sharedPrefs.getFloat("lon" + i, 0);
+                String title = sharedPrefs.getString("title" + i, "NULL");
+
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(lat, lon))
+                        .title(title));
+                markers.add(marker);
+            }
+        }
 
         // define listener
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                if (!isMapCentered) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
+                            location.getLongitude()), defaultZoom));
+                    isMapCentered = true;
+                }
 
                 // check if you're close to a location here
             }
@@ -130,8 +171,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
 
-        // Start in default location without GPS
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(0, 0)));
+        // center at last known location
+        Location lastKnownLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (lastKnownLoc != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastKnownLoc.getLatitude(),
+                    lastKnownLoc.getLongitude()), defaultZoom));
+            isMapCentered = true;
+        }
+        else {
+            // start in default location
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), defaultZoom));
+            isMapCentered = false;
+        }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }

@@ -14,6 +14,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -124,6 +125,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // load the saved locations
         sharedPrefs = getSharedPreferences("location", 0);
+        
         int numLocations = sharedPrefs.getInt("numLocations", 0);
         if (numLocations > 0) {
             for (int i = 0; i < numLocations; i++) {
@@ -151,13 +153,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 results);
 
                         // if user is within distance of favorite location
-                        if (results[0] < Constants.NOTIFICATION_DISTANCE) {
+                        if (results[0] < NOTIFICATION_DISTANCE) {
                             lastVisitedLocation = marker;
 
                             // notify user
                             Log.i("coupletones", "within location: " + marker.getTitle());
                             Toast.makeText(MapsActivity.this, "within location: " + marker.getTitle(),
                                     Toast.LENGTH_LONG).show();
+
+                            String num = sharedPrefs.getString("partnerNumber", "5554");
+                            sendMessage(num, "Your partner visited location " + marker.getTitle());
                         }
                     }
                 }
@@ -196,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setOnMapLongClickListener(this);
         }
         locationManager.requestLocationUpdates(locationProvider, 0,
-                Constants.NOTIFICATION_DISTANCE, locationListener);
+                NOTIFICATION_DISTANCE, locationListener);
 
         // center at last known location
         Location lastKnownLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
@@ -210,5 +215,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
+    }
+
+    private void sendMessage(String num, String msg) {
+        SmsManager smsManager = SmsManager.getDefault();
+        smsManager.sendTextMessage(num, null, msg, null, null);
     }
 }

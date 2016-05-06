@@ -15,4 +15,6 @@
     </string>
     <string name="title_activity_maps">Map</string>
     <string name="test_goto_map">Test - Go to Map</string>
+    <string name="register_regid">Registser RegID</string>
+    <string name="gcm_project_id">870119592082</string>
 </resources>

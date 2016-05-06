@@ -3,23 +3,24 @@ package cse110.team17.coupletones;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,8 +31,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import cse110.team17.coupletones.gcm.GcmIntentService;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -62,6 +68,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Button mButtonRegisterId;
+
+    GoogleCloudMessaging gcm;
+    String regid;
+
+    private Constants.State mState = Constants.State.UNREGISTERED;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,6 +106,47 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        mButtonRegisterId = (Button) findViewById(R.id.reg_id_button);
+        mButtonRegisterId.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mButtonRegisterId.setEnabled(true);
+//                    mBtnMessage.setEnabled(false);
+                switch (mState) {
+                    case REGISTERED:
+//                            unregisterDevice(); TODO
+                        break;
+                    case UNREGISTERED:
+                        registerDevice();
+                        break;
+                    default:
+                        Log.e("copletonesj", "click event on register button while it should be deactiviated");
+                        break;
+                }
+//                Log.v("grokkingandroid", "onClick: " + view.getId());
+//                else if (view.getId() == R.id.btn_send_message) {
+//                    sendMessage();
+//                } else if (view.getId() == R.id.btn_select_account) {
+//                    startAccountSelector();
+//                }
+            }
+        });
+
+
+        if (mState != Constants.State.REGISTERED) {
+            mButtonRegisterId.setEnabled(true); // TODO L: change this
+        }
+        else {
+            if (mState == Constants.State.REGISTERED) {
+                mButtonRegisterId.setText(R.string.register_regid);
+                getRegId();
+//                mButtonRegisterId.setText(getRegId());
+//                Log.i("test",getRegId());
+            }
+//            mBtnMessage.setOnClickListener(this); , not sure what is this
+        }
+
+
         // New button to go to map activity
         Button mTestMapButton = (Button) findViewById(R.id.test_go_to_map);             assert mTestMapButton != null;
         mTestMapButton.setOnClickListener(new OnClickListener() {
@@ -105,6 +159,49 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private void registerDevice() {
+        Intent regIntent = new Intent(this, GcmIntentService.class);
+//        if (!TextUtils.isEmpty(mTxtAccountName.getText())) {
+//            regIntent.putExtra(Constants.KEY_ACCOUNT, mTxtAccountName.getText().toString());
+//        }
+//        else {
+//            regIntent.putExtra(Constants.KEY_ACCOUNT, Constants.DEFAULT_USER);
+//        }
+//        regIntent.setAction(Constants.ACTION_REGISTER);
+//        getActivity().startService(regIntent);
+    }
+
+    private void getRegId() {
+        new AsyncTask<Void, Void, String>() {
+
+            @Override
+            protected String doInBackground(Void... params) {
+                String msg = "";
+                try {
+                    if(gcm == null) {
+                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+                    }
+
+                    regid = gcm.register(Constants.PROJECT_ID);
+                    msg = "Device registered, registration ID=" + regid;
+                    Log.i("GCM", "!!!!! " + regid);
+
+                } catch(IOException ex) {
+                    msg = "Error: " + ex.getMessage();
+                }
+                return msg;
+            }
+
+            @Override
+            protected void onPostExecute(String msg) {
+                mButtonRegisterId.setText(msg);
+            }
+        }.execute(null, null, null);
+//        SharedPreferences prefs = PreferenceManager
+//                .getDefaultSharedPreferences(this);
+//        return prefs.getString(Constants.KEY_REG_ID, null);
     }
 
     private void populateAutoComplete() {

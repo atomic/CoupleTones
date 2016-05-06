@@ -1,0 +1,35 @@
+{
+  "project_info": {
+    "project_number": "870119592082",
+    "project_id": "winter-cab-130122"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870119592082:android:2e04c80f51124e8f",
+        "android_client_info": {
+          "package_name": "cse110.team17.coupletones"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbLudpSnCNI5MZIKSi1RQ8x08Je86YeqQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

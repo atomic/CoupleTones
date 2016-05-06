@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
-    private static final float defaultZoom = 14.0f;
+    private static final float defaultZoom = 15.0f;
 
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;

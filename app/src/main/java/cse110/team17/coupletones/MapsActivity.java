@@ -1,6 +1,7 @@
 package cse110.team17.coupletones;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -16,7 +18,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,17 +29,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
-    private static final float defaultZoom = 14.0f;
+    private static final float defaultZoom = 15.0f;
+
+    // distance within location to send notification (1/10 mile)
+    private static final float NOTIFICATION_DISTANCE = 161.0f;
 
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;
+
     private ArrayList<Marker> markers;
-    private boolean isMapCentered = false;
+    private Marker lastVisitedLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +58,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapLongClick(final LatLng point) {
+        createAddDialog(point);
+    }
+
+    /**
+     * Creates an alert dialog that allows the user to name and add a location.
+     * @param point lat/lng of location
+     */
+    private void createAddDialog(final LatLng point) {
         View alertView = LayoutInflater.from(MapsActivity.this).inflate(R.layout.alert_add, null);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(alertView);
@@ -125,13 +142,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if (!isMapCentered) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
-                            location.getLongitude()), defaultZoom));
-                    isMapCentered = true;
-                }
+                // check if you're close to a location here and send notification upstream
+                for (Marker marker : markers) {
+                    if (marker != lastVisitedLocation) {
+                        float[] results = new float[3];
+                        Location.distanceBetween(location.getLatitude(), location.getLongitude(),
+                                marker.getPosition().latitude, marker.getPosition().longitude,
+                                results);
 
-                // check if you're close to a location here
+                        // if user is within distance of favorite location
+                        if (results[0] < Constants.NOTIFICATION_DISTANCE) {
+                            lastVisitedLocation = marker;
+
+                            // notify user
+                            Log.i("coupletones", "within location: " + marker.getTitle());
+                            Toast.makeText(MapsActivity.this, "within location: " + marker.getTitle(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
             }
 
             @Override
@@ -166,19 +195,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
             mMap.setOnMapLongClickListener(this);
         }
-        locationManager.requestLocationUpdates(locationProvider, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(locationProvider, 0,
+                Constants.NOTIFICATION_DISTANCE, locationListener);
 
         // center at last known location
         Location lastKnownLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (lastKnownLoc != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastKnownLoc.getLatitude(),
                     lastKnownLoc.getLongitude()), defaultZoom));
-            isMapCentered = true;
         }
         else {
             // start in default location
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), defaultZoom));
-            isMapCentered = false;
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(40, -100)));
         }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);

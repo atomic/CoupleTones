@@ -3,49 +3,31 @@ package cse110.team17.coupletones;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.LoaderManager.LoaderCallbacks;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.location.internal.LocationRequestUpdateData;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import cse110.team17.coupletones.gcm.GcmIntentService;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity  {
 
+    public static final String LOGIN = "LoginActivity";
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -65,9 +47,13 @@ public class LoginActivity extends AppCompatActivity  {
 
     // UI references.
     private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mPhoneView;
     private View mProgressView;
     private View mLoginFormView;
-    private Button mButtonRegisterId;
+
+//    private Button mButtonRegisterId;
+    private Button mButtonSignIn;           // This button is used to sign in/ or sign up for now
+    private Button mButtonSignPartner;
 
     private GoogleCloudMessaging gcm;
 
@@ -75,7 +61,8 @@ public class LoginActivity extends AppCompatActivity  {
 
     private UserAccount mUserAccount;
 
-    private Constants.State mState = Constants.State.UNREGISTERED;
+    private Constants.State mState          = Constants.State.UNREGISTERED;
+    private Constants.State mStatePartner   = Constants.State.UNREGISTERED;
 
 
     @Override
@@ -84,57 +71,74 @@ public class LoginActivity extends AppCompatActivity  {
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mPhoneView = (AutoCompleteTextView) findViewById(R.id.phone_number);
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);   assert mEmailSignInButton != null;
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        mUserAccount = new UserAccount();
+
+        mButtonSignIn = (Button) findViewById(R.id.sign_in_button);
+        mButtonSignIn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Milestone 1 : Implement Login
-                attemptLogin();
-                // For now, do nothing, but spawn new activity on map
-            }
-        });
-
-        mButtonRegisterId = (Button) findViewById(R.id.reg_id_button);
-        mButtonRegisterId.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mButtonRegisterId.setEnabled(true);
-//                    mBtnMessage.setEnabled(false);
-                switch (mState) {
-                    case REGISTERED:
-//                            unregisterDevice(); TODO
-                        break;
-                    case UNREGISTERED:
-                        registerDevice();
-                        break;
-                    default:
-                        Log.e("copletonesj", "click event on register button while it should be deactiviated");
-                        break;
+                if( !registerUser() ) {
+                    Toast.makeText(LoginActivity.this, "No inputs.", Toast.LENGTH_SHORT).show();
+                } else {
+                    mState = Constants.State.REGISTERED;
+                    mEmailView.setHint("Partner's Email");
+                    mEmailView.setText("");
+                    mPhoneView.setHint("Partner's Phone number");
+                    mPhoneView.setText("");
+                    mButtonSignIn.setEnabled(false);
+                    mButtonSignPartner.setEnabled(true);
+                    Toast.makeText(LoginActivity.this, "User registered", Toast.LENGTH_SHORT).show();
                 }
-//                Log.v("grokkingandroid", "onClick: " + view.getId());
-//                else if (view.getId() == R.id.btn_send_message) {
-//                    sendMessage();
-//                } else if (view.getId() == R.id.btn_select_account) {
-//                    startAccountSelector();
-//                }
+            }
+        });
+
+        mButtonSignPartner = (Button) findViewById(R.id.sign_partner);
+        mButtonSignPartner.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if( !registerPartner() ) {
+                    Toast.makeText(LoginActivity.this, "No inputs.", Toast.LENGTH_SHORT).show();
+                } else {
+                    mStatePartner = Constants.State.REGISTERED;
+                    mEmailView.setEnabled(false);
+                    mPhoneView.setEnabled(false);
+                    mButtonSignPartner.setEnabled(false);
+                    Toast.makeText(LoginActivity.this, "Partner registered", Toast.LENGTH_SHORT).show();
+
+                    Utils.delay(2, new Utils.DelayCallback() {
+                        @Override
+                        public void afterDelay() {
+                            Toast.makeText(LoginActivity.this, "Showing Map..", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    Utils.delay(1, new Utils.DelayCallback() {
+                        @Override
+                        public void afterDelay() {
+                            Intent i = new Intent(LoginActivity.this, MapsActivity.class);  // TODO: will need to be replaced later to allow data passing, or change to fragment
+                            startActivity(i);
+                        }
+                    });
+
+                }
             }
         });
 
 
-        if (mState != Constants.State.REGISTERED) {
-            mButtonRegisterId.setEnabled(true); // TODO L: change this
-        }
-        else {
-            if (mState == Constants.State.REGISTERED) {
-                mButtonRegisterId.setText(R.string.register_regid);
-                getRegId();
-//                mButtonRegisterId.setText(getRegId());
-//                Log.i("test",getRegId());
-            }
-//            mBtnMessage.setOnClickListener(this); , not sure what is this
-        }
-
+        // TODO: Delete this, for now, since we are using phone number instead
+//        mButtonRegisterId = (Button) findViewById(R.id.reg_id_button);
+//        mButtonRegisterId.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                // after registered, this button should be disabled, no need for switch case
+//                if( mState == Constants.State.REGISTERED)
+//                    throw new AssertionError("User already registered");
+//                registerUser();
+////                }
+//            }
+//        });
 
         // New button to go to map activity
         Button mTestMapButton = (Button) findViewById(R.id.test_go_to_map);             assert mTestMapButton != null;
@@ -150,6 +154,36 @@ public class LoginActivity extends AppCompatActivity  {
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    private boolean registerPartner() {
+        if( mStatePartner == Constants.State.REGISTERED )
+            return false;
+        Integer partnerPhone = Integer.parseInt(mPhoneView.getText().toString());
+        Log.d(LOGIN, "parterPhone : " + partnerPhone);
+        mUserAccount.addPartner(partnerPhone);
+        mUserAccount.setPartnerEmail(mEmailView.getText().toString());  // NOTE: might be empty
+
+        // TODO: register partner here, need to do all that authentication
+        return true;
+    }
+
+    /**
+     * Function to register the information on user
+     */
+    private boolean registerUser() {
+        String email = mEmailView.getText().toString();
+        String phone = mPhoneView.getText().toString();
+        Log.d(LOGIN, "email : " + email);
+        Log.d(LOGIN, "phone : " + phone);
+        if(email.isEmpty() && phone.isEmpty())
+            return false;
+        if(phone.isEmpty())
+            return false; // for now Phone is more important
+
+        mUserAccount.setUserEmail(email);
+        mUserAccount.setUserPhone(Integer.parseInt(phone));
+        return true;
+    }
+
     private void registerDevice() {
         Intent regIntent = new Intent(this, GcmIntentService.class);
 //        if (!TextUtils.isEmpty(mTxtAccountName.getText())) {
@@ -162,36 +196,36 @@ public class LoginActivity extends AppCompatActivity  {
 //        getActivity().startService(regIntent);
     }
 
-    private void getRegId() {
-        new AsyncTask<Void, Void, String>() {
-
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    if(gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-                    }
-
-                    regid = gcm.register(Constants.PROJECT_ID);
-                    msg = "Device registered, registration ID=" + regid;
-                    Log.i("GCM", "!!!!! " + regid);
-
-                } catch(IOException ex) {
-                    msg = "Error: " + ex.getMessage();
-                }
-                return msg;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                mButtonRegisterId.setText(msg);
-            }
-        }.execute(null, null, null);
+//    private void getRegId() {
+//        new AsyncTask<Void, Void, String>() {
+//
+//            @Override
+//            protected String doInBackground(Void... params) {
+//                String msg = "";
+//                try {
+//                    if(gcm == null) {
+//                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
+//                    }
+//
+//                    regid = gcm.register(Constants.PROJECT_ID);
+//                    msg = "Device registered, registration ID=" + regid;
+//                    Log.i("GCM", "!!!!! " + regid);
+//
+//                } catch(IOException ex) {
+//                    msg = "Error: " + ex.getMessage();
+//                }
+//                return msg;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(String msg) {
+//                mButtonRegisterId.setText(msg);
+//            }
+//        }.execute(null, null, null);
 //        SharedPreferences prefs = PreferenceManager
 //                .getDefaultSharedPreferences(this);
 //        return prefs.getString(Constants.KEY_REG_ID, null);
-    }
+//    }
 
 
     /**

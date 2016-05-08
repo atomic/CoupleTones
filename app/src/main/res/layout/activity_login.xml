@@ -38,6 +38,21 @@
                     android:id="@+id/email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/prompt_email"
+                    android:inputType="textEmailAddress"
+                    android:maxLines="1"
+                    android:singleLine="true"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <AutoCompleteTextView
+                    android:id="@+id/phone_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:hint="@string/prompt_phone"
                     android:inputType="phone"
                     android:maxLines="1"
@@ -46,22 +61,34 @@
             </android.support.design.widget.TextInputLayout>
 
             <Button
-                android:id="@+id/email_sign_in_button"
+                android:id="@+id/sign_in_button"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/action_sign_phone"
                 android:textStyle="bold"/>
+
             <Button
-                android:id="@+id/reg_id_button"
+                android:id="@+id/sign_partner"
+                android:enabled="false"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="?android:textAppearanceSmall"
                 android:layout_marginTop="16dp"
-                android:text="@string/register_regid"
+                android:text="@string/register_partner"
                 android:textStyle="bold"
                 />
+
+            <!--<Button-->
+                <!--android:id="@+id/reg_id_button"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--style="?android:textAppearanceSmall"-->
+                <!--android:layout_marginTop="16dp"-->
+                <!--android:text="@string/register_regid"-->
+                <!--android:textStyle="bold"-->
+                <!--/>-->
 
             <Button
                 android:id="@+id/test_go_to_map"

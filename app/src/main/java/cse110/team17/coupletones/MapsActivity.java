@@ -221,7 +221,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         else {
             // start in default location
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_LOCATION));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(DEFAULT_LOCATION, DEFAULT_ZOOM));
         }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);

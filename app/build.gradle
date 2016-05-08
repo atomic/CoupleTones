@@ -10,6 +10,7 @@ android {
         applicationId "cse110.team17.coupletones"
         minSdkVersion 17
         targetSdkVersion 23
+        multiDexEnabled true
         versionCode 1
         versionName "1.0"
     }
@@ -20,7 +21,7 @@ android {
         }
     }
     dexOptions {
-        incremental true
+//        incremental true
         javaMaxHeapSize "4g"
     }
 }
@@ -45,5 +46,5 @@ dependencies {
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.6.0'
     compile 'com.fasterxml.jackson.core:jackson-core:2.6.0'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.6.0'
-    compile 'com.android.support:multidex:1.0.0'
+    compile 'com.android.support:multidex:1.0.1'
 }

@@ -17,4 +17,7 @@
     <string name="test_goto_map">Test - Go to Map</string>
     <string name="register_regid">Registser RegID</string>
     <string name="gcm_project_id">870119592082</string>
+    <string name="prompt_phone">Phone Number</string>
+    <string name="action_sign_phone">Sign Phone</string>
+    <string name="register_partner">Sign Partner</string>
 </resources>

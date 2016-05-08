@@ -40,11 +40,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // where to start the map by default
     private static final LatLng DEFAULT_LOCATION = new LatLng(40, -100);
 
+    public static final String EXTRA_GET_USER = "cse110.team16.coupletones.user";
+    public static final String EXTRA_GET_PARTNER_PHONE = "cse110.team16.coupletones.partner_phone";
+
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;
 
     private ArrayList<FavoriteLocation> favoriteLocations;
     private FavoriteLocation lastVisitedLocation;
+
+    private String mPartnerNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+
+        // Getting partner's number from previous activity
+        mPartnerNumber = getIntent().getStringExtra(EXTRA_GET_PARTNER_PHONE);
+        Log.d("MapActivity", "partner number : " + mPartnerNumber);
     }
 
     @Override

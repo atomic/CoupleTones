@@ -69,8 +69,11 @@ public class LoginActivity extends AppCompatActivity  {
     private View mLoginFormView;
     private Button mButtonRegisterId;
 
-    GoogleCloudMessaging gcm;
-    String regid;
+    private GoogleCloudMessaging gcm;
+
+    private String regid;
+
+    private UserAccount mUserAccount;
 
     private Constants.State mState = Constants.State.UNREGISTERED;
 

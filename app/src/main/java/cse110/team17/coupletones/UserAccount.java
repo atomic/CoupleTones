@@ -15,6 +15,7 @@ public class UserAccount {
 
     private String mUsername;
     private String mUserEmail;
+    private Integer mUserPhone;
 
     private boolean hasPartner;
     private String mPartnerEmail;
@@ -76,5 +77,25 @@ public class UserAccount {
 
     public String getPartnerRegId() {
         return mPartnerRegId;
+    }
+
+    public void setPartnerEmail(String partnerEmail) {
+        mPartnerEmail = partnerEmail;
+    }
+
+    public void setUsername(String username) {
+        mUsername = username;
+    }
+
+    public void setUserEmail(String userEmail) {
+        mUserEmail = userEmail;
+    }
+
+    public void setUserPhone(Integer userPhone) {
+        mUserPhone = userPhone;
+    }
+
+    public Integer getUserPhone() {
+        return mUserPhone;
     }
 }

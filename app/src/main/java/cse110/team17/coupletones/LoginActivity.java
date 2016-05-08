@@ -157,7 +157,7 @@ public class LoginActivity extends AppCompatActivity  {
     private boolean registerPartner() {
         if( mStatePartner == Constants.State.REGISTERED )
             return false;
-        Integer partnerPhone = Integer.parseInt(mPhoneView.getText().toString());
+        String partnerPhone = mPhoneView.getText().toString();
         Log.d(LOGIN, "parterPhone : " + partnerPhone);
         mUserAccount.addPartner(partnerPhone);
         mUserAccount.setPartnerEmail(mEmailView.getText().toString());  // NOTE: might be empty
@@ -180,7 +180,7 @@ public class LoginActivity extends AppCompatActivity  {
             return false; // for now Phone is more important
 
         mUserAccount.setUserEmail(email);
-        mUserAccount.setUserPhone(Integer.parseInt(phone));
+        mUserAccount.setUserPhone(phone);
         return true;
     }
 

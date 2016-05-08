@@ -1,7 +1,6 @@
 package cse110.team17.coupletones;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -9,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -21,7 +19,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,22 +27,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
-    private static final float defaultZoom = 15.0f;
+    private static final float DEFAULT_ZOOM = 15.0f;
 
     // distance within location to send notification (1/10 mile)
     private static final float NOTIFICATION_DISTANCE = 161.0f;
 
+    // where to start the map by default
+    private static final LatLng DEFAULT_LOCATION = new LatLng(40, -100);
+
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;
 
-    private ArrayList<Marker> markers;
-    private Marker lastVisitedLocation;
+    private ArrayList<FavoriteLocation> favoriteLocations;
+    private FavoriteLocation lastVisitedLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +59,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(final LatLng point) {
         createAddDialog(point);
+    }
+
+    public void saveFavoriteLocation(FavoriteLocation favoriteLocation) {
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+
+        editor.putInt("numLocations", favoriteLocations.size());
+
+        // index of last element (marker just added)
+        int i = favoriteLocations.size() - 1;
+        editor.putFloat("lat" + i, (float) favoriteLocation.getLocation().latitude);
+        editor.putFloat("lon" + i, (float) favoriteLocation.getLocation().longitude);
+        editor.putString("title" + i, favoriteLocation.getTitle());
+
+        editor.commit();
+
+        favoriteLocations.add(favoriteLocation);
+    }
+
+    public void loadFavoriteLocations() {
+        // load the saved locations
+        int numLocations = sharedPrefs.getInt("numLocations", 0);
+        if (numLocations > 0) {
+            for (int i = 0; i < numLocations; i++) {
+                double lat = (double) sharedPrefs.getFloat("lat" + i, 0);
+                double lon = (double) sharedPrefs.getFloat("lon" + i, 0);
+                String title = sharedPrefs.getString("title" + i, "NULL");
+
+                FavoriteLocation favoriteLocation = new FavoriteLocation(title,
+                        new LatLng(lat, lon));
+                favoriteLocation.addToGoogleMap(mMap);
+
+                favoriteLocations.add(favoriteLocation);
+            }
+        }
     }
 
     /**
@@ -81,23 +114,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         String title = ((EditText) alertDialog.findViewById(R.id.etTitle)).
                                 getText().toString();
 
-                        Marker marker = mMap.addMarker(new MarkerOptions()
-                                .position(point)
-                                .title(title));
-                        markers.add(marker);
+                        FavoriteLocation favoriteLocation = new FavoriteLocation(title, point);
+                        favoriteLocation.addToGoogleMap(mMap);
 
-                        // save the marker
-                        SharedPreferences.Editor editor = sharedPrefs.edit();
-
-                        editor.putInt("numLocations", markers.size());
-
-                        // index of last element (marker just added)
-                        int i = markers.size() - 1;
-                        editor.putFloat("lat" + i, (float) point.latitude);
-                        editor.putFloat("lon" + i, (float) point.longitude);
-                        editor.putString("title" + i, title);
-
-                        editor.commit();
+                        saveFavoriteLocation(favoriteLocation);
                     }
                 });
 
@@ -121,48 +141,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        markers = new ArrayList<>();
+        favoriteLocations = new ArrayList<>();
 
-        // load the saved locations
         sharedPrefs = getSharedPreferences("location", 0);
-        
-        int numLocations = sharedPrefs.getInt("numLocations", 0);
-        if (numLocations > 0) {
-            for (int i = 0; i < numLocations; i++) {
-                double lat = (double) sharedPrefs.getFloat("lat" + i, 0);
-                double lon = (double) sharedPrefs.getFloat("lon" + i, 0);
-                String title = sharedPrefs.getString("title" + i, "NULL");
-
-                Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(lat, lon))
-                        .title(title));
-                markers.add(marker);
-            }
-        }
+        loadFavoriteLocations();
 
         // define listener
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+
                 // check if you're close to a location here and send notification upstream
-                for (Marker marker : markers) {
-                    if (marker != lastVisitedLocation) {
-                        float[] results = new float[3];
-                        Location.distanceBetween(location.getLatitude(), location.getLongitude(),
-                                marker.getPosition().latitude, marker.getPosition().longitude,
-                                results);
+                for (FavoriteLocation favoriteLocation : favoriteLocations) {
+                    if (favoriteLocation != lastVisitedLocation) {
+                        float distance = favoriteLocation.distanceTo(position);
 
                         // if user is within distance of favorite location
-                        if (results[0] < NOTIFICATION_DISTANCE) {
-                            lastVisitedLocation = marker;
+                        if (distance < NOTIFICATION_DISTANCE) {
+                            lastVisitedLocation = favoriteLocation;
 
-                            // notify user
-                            Log.i("coupletones", "within location: " + marker.getTitle());
-                            Toast.makeText(MapsActivity.this, "within location: " + marker.getTitle(),
-                                    Toast.LENGTH_LONG).show();
+                            // TODO: remove
+                            Log.i("coupletones", "within location: " + favoriteLocation.getTitle());
+                            Toast.makeText(MapsActivity.this, "within location: " +
+                                    favoriteLocation.getTitle(), Toast.LENGTH_LONG).show();
 
+                            // TODO: login should save partner number as a shared preference
                             String num = sharedPrefs.getString("partnerNumber", "5554");
-                            sendMessage(num, "Your partner visited location " + marker.getTitle());
+                            sendMessage(num, "Your partner visited location " +
+                                    favoriteLocation.getTitle());
                         }
                     }
                 }
@@ -183,6 +190,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         String locationProvider = LocationManager.GPS_PROVIDER;
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -200,6 +208,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.setMyLocationEnabled(true);
             mMap.setOnMapLongClickListener(this);
         }
+
+        // only update location if we move past the notification distance
         locationManager.requestLocationUpdates(locationProvider, 0,
                 NOTIFICATION_DISTANCE, locationListener);
 
@@ -207,11 +217,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Location lastKnownLoc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (lastKnownLoc != null) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastKnownLoc.getLatitude(),
-                    lastKnownLoc.getLongitude()), defaultZoom));
+                    lastKnownLoc.getLongitude()), DEFAULT_ZOOM));
         }
         else {
             // start in default location
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(40, -100)));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_LOCATION));
         }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);

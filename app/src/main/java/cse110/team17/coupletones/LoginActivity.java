@@ -83,9 +83,9 @@ public class LoginActivity extends AppCompatActivity  {
                     Toast.makeText(LoginActivity.this, "No inputs.", Toast.LENGTH_SHORT).show();
                 } else {
                     mState = Constants.State.REGISTERED;
-                    mEmailView.setHint("Partner's Email");
+                    //mEmailView.setHint("Partner's Email");
                     mEmailView.setText("");
-                    mPhoneView.setHint("Partner's Phone number");
+                    //mPhoneView.setHint("Partner's Phone number");
                     mPhoneView.setText("");
                     mButtonSignIn.setEnabled(false);
                     mButtonSignPartner.setEnabled(true);

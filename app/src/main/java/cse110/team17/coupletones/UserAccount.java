@@ -15,12 +15,12 @@ public class UserAccount {
 
     private String mUsername;
     private String mUserEmail;
-    private Integer mUserPhone;
+    private String mUserPhone;
 
     private boolean hasPartner;
     private String mPartnerEmail;
     private String mPartnerRegId;
-    private Integer mPartnerPhone;
+    private String mPartnerPhone;
 
     /**
      * favorite places that contains Markers.
@@ -38,7 +38,7 @@ public class UserAccount {
      * @param partnerPhone : partner's phone number
      * @return boolean to represent whether a partner already added or not
      */
-    public boolean addPartner(final Integer partnerPhone)
+    public boolean addPartner(final String partnerPhone)
     {
         if( !hasPartner) return false;
         hasPartner = true;
@@ -59,7 +59,7 @@ public class UserAccount {
     /**
      * Getter for member variables
      */
-    public Integer getPartnerPhone() {
+    public String getPartnerPhone() {
         return mPartnerPhone;
     }
 
@@ -91,11 +91,11 @@ public class UserAccount {
         mUserEmail = userEmail;
     }
 
-    public void setUserPhone(Integer userPhone) {
+    public void setUserPhone(String userPhone) {
         mUserPhone = userPhone;
     }
 
-    public Integer getUserPhone() {
+    public String getUserPhone() {
         return mUserPhone;
     }
 }

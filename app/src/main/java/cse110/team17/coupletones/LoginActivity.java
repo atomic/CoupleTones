@@ -118,6 +118,7 @@ public class LoginActivity extends AppCompatActivity  {
                         @Override
                         public void afterDelay() {
                             Intent i = new Intent(LoginActivity.this, MapsActivity.class);  // TODO: will need to be replaced later to allow data passing, or change to fragment
+                            i.putExtra(MapsActivity.EXTRA_GET_PARTNER_PHONE, mUserAccount.getPartnerPhone());
                             startActivity(i);
                         }
                     });
@@ -138,7 +139,7 @@ public class LoginActivity extends AppCompatActivity  {
 //                registerUser();
 ////                }
 //            }
-//        });
+//        })
 
         // New button to go to map activity
         Button mTestMapButton = (Button) findViewById(R.id.test_go_to_map);             assert mTestMapButton != null;
@@ -184,48 +185,6 @@ public class LoginActivity extends AppCompatActivity  {
         return true;
     }
 
-    private void registerDevice() {
-        Intent regIntent = new Intent(this, GcmIntentService.class);
-//        if (!TextUtils.isEmpty(mTxtAccountName.getText())) {
-//            regIntent.putExtra(Constants.KEY_ACCOUNT, mTxtAccountName.getText().toString());
-//        }
-//        else {
-//            regIntent.putExtra(Constants.KEY_ACCOUNT, Constants.DEFAULT_USER);
-//        }
-//        regIntent.setAction(Constants.ACTION_REGISTER);
-//        getActivity().startService(regIntent);
-    }
-
-//    private void getRegId() {
-//        new AsyncTask<Void, Void, String>() {
-//
-//            @Override
-//            protected String doInBackground(Void... params) {
-//                String msg = "";
-//                try {
-//                    if(gcm == null) {
-//                        gcm = GoogleCloudMessaging.getInstance(getApplicationContext());
-//                    }
-//
-//                    regid = gcm.register(Constants.PROJECT_ID);
-//                    msg = "Device registered, registration ID=" + regid;
-//                    Log.i("GCM", "!!!!! " + regid);
-//
-//                } catch(IOException ex) {
-//                    msg = "Error: " + ex.getMessage();
-//                }
-//                return msg;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(String msg) {
-//                mButtonRegisterId.setText(msg);
-//            }
-//        }.execute(null, null, null);
-//        SharedPreferences prefs = PreferenceManager
-//                .getDefaultSharedPreferences(this);
-//        return prefs.getString(Constants.KEY_REG_ID, null);
-//    }
 
 
     /**

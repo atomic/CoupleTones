@@ -143,13 +143,14 @@ public class LoginActivity extends AppCompatActivity  {
 
         // New button to go to map activity
         Button mTestMapButton = (Button) findViewById(R.id.test_go_to_map);             assert mTestMapButton != null;
-        mTestMapButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(LoginActivity.this, MapsActivity.class);  // TODO: will need to be replaced later to allow data passing, or change to fragment
-                startActivity(i);
-            }
-        });
+        mTestMapButton.setEnabled(false);
+//        mTestMapButton.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent i = new Intent(LoginActivity.this, MapsActivity.class);  // TODO: will need to be replaced later to allow data passing, or change to fragment
+//                startActivity(i);
+//            }
+//        });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);

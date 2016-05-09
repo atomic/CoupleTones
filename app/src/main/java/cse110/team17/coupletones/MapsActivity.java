@@ -3,6 +3,7 @@ package cse110.team17.coupletones;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -28,6 +29,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
@@ -241,4 +243,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SmsManager smsManager = SmsManager.getDefault();
         smsManager.sendTextMessage(num, null, msg, null, null);
     }
+
+
+    public static Intent newIntent(Context packageContext, String partnerNumber) {
+        Intent i = new Intent(packageContext, MapsActivity.class);
+        i.putExtra(EXTRA_GET_PARTNER_PHONE, partnerNumber);
+        return i;
+    }
+
 }

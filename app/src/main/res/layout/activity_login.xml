@@ -22,26 +22,27 @@
     <ScrollView
         android:id="@+id/login_form"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" >
 
         <LinearLayout
             android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical" >
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <AutoCompleteTextView
-                    android:id="@+id/email"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/prompt_email"
-                    android:inputType="textEmailAddress"
-                    android:maxLines="1"
-                    android:singleLine="true"/>
+                <!--<AutoCompleteTextView-->
+                    <!--android:id="@+id/email"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:hint="@string/prompt_email"-->
+                    <!--android:inputType="textEmailAddress"-->
+                    <!--android:maxLines="1"-->
+                    <!--android:singleLine="true"/>-->
 
             </android.support.design.widget.TextInputLayout>
 
@@ -53,6 +54,7 @@
                     android:id="@+id/phone_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
                     android:hint="@string/prompt_phone"
                     android:inputType="phone"
                     android:maxLines="1"
@@ -62,6 +64,7 @@
 
             <Button
                 android:id="@+id/sign_in_button"
+                android:enabled="false"
                 style="?android:textAppearanceSmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,7 +74,7 @@
 
             <Button
                 android:id="@+id/sign_partner"
-                android:enabled="false"
+                android:enabled="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="?android:textAppearanceSmall"
@@ -90,14 +93,14 @@
                 <!--android:textStyle="bold"-->
                 <!--/>-->
 
-            <Button
-                android:id="@+id/test_go_to_map"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                style="?android:textAppearanceSmall"
-                android:text="@string/test_goto_map"
-                android:layout_marginTop="16dp"
-                android:textStyle="bold"/>
+            <!--<Button-->
+                <!--android:id="@+id/test_go_to_map"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent"-->
+                <!--style="?android:textAppearanceSmall"-->
+                <!--android:text="@string/test_goto_map"-->
+                <!--android:layout_marginTop="16dp"-->
+                <!--android:textStyle="bold"/>-->
 
         </LinearLayout>
     </ScrollView>

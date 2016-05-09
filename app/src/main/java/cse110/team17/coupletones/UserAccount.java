@@ -1,5 +1,7 @@
 package cse110.team17.coupletones;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -40,9 +42,10 @@ public class UserAccount {
      */
     public boolean addPartner(final String partnerPhone)
     {
-        if( !hasPartner) return false;
+        if( hasPartner) return false;
         hasPartner = true;
         mPartnerPhone = partnerPhone;
+        Log.d("UesrAccount", partnerPhone);
         return true;
     }
 

@@ -117,11 +117,12 @@ public class LoginActivity extends AppCompatActivity  {
                     Utils.delay(1, new Utils.DelayCallback() {
                         @Override
                         public void afterDelay() {
-                            Intent i = new Intent(LoginActivity.this, MapsActivity.class);  // TODO: will need to be replaced later to allow data passing, or change to fragment
-                            i.putExtra(MapsActivity.EXTRA_GET_PARTNER_PHONE, mUserAccount.getPartnerPhone());
-                            startActivity(i);
                         }
                     });
+
+                    Intent i = MapsActivity.newIntent(LoginActivity.this, mUserAccount.getPartnerPhone());
+                    Log.d(LOGIN, "partner phone (before starting Map): " + mUserAccount.getPartnerPhone());
+                    startActivity(i);
 
                 }
             }

@@ -22,8 +22,11 @@ public class JUnit_testLogin extends ActivityInstrumentationTestCase2<LoginActiv
 
     public void test_first() {
         loginActivity = getActivity();
-        TextView textView = (TextView) loginActivity.findViewById(R.id.email);
-        String tester = textView.getText().toString();
+        TextView phoneText = (TextView) loginActivity.findViewById(R.id.phone_number);
+        assert phoneText != null;
+        phoneText.setText("5555");
+
+        String tester = phoneText.getText().toString();
 
         assertEquals("", tester);
     }

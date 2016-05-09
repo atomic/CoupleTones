@@ -62,7 +62,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
         // Getting partner's number from previous activity
         mPartnerNumber = getIntent().getStringExtra(EXTRA_GET_PARTNER_PHONE);
         Log.d("MapActivity", "partner number : " + mPartnerNumber);
@@ -173,14 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (distance < NOTIFICATION_DISTANCE) {
                             lastVisitedLocation = favoriteLocation;
 
-                            // TODO: remove
-                            Log.i("coupletones", "within location: " + favoriteLocation.getTitle());
-                            Toast.makeText(MapsActivity.this, "within location: " +
-                                    favoriteLocation.getTitle(), Toast.LENGTH_LONG).show();
-
-                            // TODO: login should save partner number as a shared preference
-                            String num = sharedPrefs.getString("partnerNumber", "5554");
-                            sendMessage(num, "Your partner visited location " +
+                            sendMessage(mPartnerNumber, "Your partner visited location " +
                                     favoriteLocation.getTitle());
                         }
                     }

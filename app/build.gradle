@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+//apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
@@ -17,6 +19,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
+    }
 }
 
 dependencies {
@@ -25,4 +31,19 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile 'com.android.support:design:23.3.0'
     compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'de.greenrobot:eventbus:2.2.0'
+    //compile 'de.keyboardsurfer.android.widget:crouton:1.8.2'
+    //compile 'de.keyboardsurfer.android.widget:crouton-library:1.8.2'
+    compile ('de.keyboardsurfer.android.widget:crouton:1.8.1') {
+        exclude module: 'support-v4'
+        compile 'com.android.support:support-v4:18.0.+'
+    }
+    //compile 'org.json:json:20141113'
+    compile 'com.googlecode.json-simple:json-simple:1.1'
+
+    compile 'jivesoftware:smackx:3.1.0'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.6.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.6.0'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.6.0'
+    compile 'com.android.support:multidex:1.0.0'
 }

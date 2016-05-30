@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +34,8 @@ import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
+
+    private static final String TAG = "MapsActivity";
 
     private static final float DEFAULT_ZOOM = 15.0f;
 
@@ -64,7 +67,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Getting partner's number from previous activity
         mPartnerNumber = getIntent().getStringExtra(EXTRA_GET_PARTNER_PHONE);
-        Log.d("MapActivity", "partner number : " + mPartnerNumber);
+        Log.d(TAG, "partner number : " + mPartnerNumber);
+
+        // TODO: use this push to do something else,
+        Utils.mFirebaseRef.child("coupletones").setValue("Going in to MapActivity");
+        // Test send something to Firebase (TODO: extends)
     }
 
     @Override

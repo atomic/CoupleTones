@@ -2,12 +2,17 @@ package cse110.team17.coupletones;
 
 import android.os.Handler;
 
+import com.firebase.client.Firebase;
+
 /**
  * Created by atomic on 5/8/16.
  */
 public class Utils {
 
     // Delay mechanism
+    public static Firebase mFirebaseRef = new Firebase("https://vivid-inferno-5451.firebaseio.com/");
+    // TODO: find a way to store GPX on firebase and make it singleton here
+
 
     public interface DelayCallback{
         void afterDelay();

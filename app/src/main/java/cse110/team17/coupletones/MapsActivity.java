@@ -18,9 +18,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -51,18 +55,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;
 
-    private ArrayList<FavoriteLocation> favoriteLocations;
+    private LocationList locations;
     private FavoriteLocation lastVisitedLocation;
 
     private String mUserNumber;
     private String mPartnerNumber;
 
-    Map<String, String> mLocationInfo = new HashMap<String, String>();
-    Map<String, Map<String, String>> places = new HashMap<String, Map<String, String>>();
-
-    Firebase    mUserLocationListRef;
     Firebase    mUserNearLocation;
-    Query       mPartnerRef;
+    Firebase    mPartnerRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,17 +77,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mPartnerNumber = UserAccount.getPartnerPhone();
         mUserNumber    = UserAccount.getUserPhone();
 
-        mUserLocationListRef = Utils.sFirebaseRoot.child(mUserNumber).child(LOC_LIST);
         mUserNearLocation    = Utils.sFirebaseRoot.child(mUserNumber).child(USER_NEAR);
+        mPartnerRef = Utils.sFirebaseRoot.child(mPartnerNumber).child(USER_NEAR);
 
+        mUserNearLocation.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String data = dataSnapshot.getValue(String.class);
+                if (data != null && !data.isEmpty()) {
+                    Toast.makeText(MapsActivity.this, data, Toast.LENGTH_LONG).show();
+                    mUserNearLocation.setValue("");
+                }
+            }
 
-//        mLocationInfo.put("lon", Double.toString(123123) );
-//        mLocationInfo.put("lat", Double.toString(999999) );
-//        places.put("Chipotle", mLocationInfo);
-//        mLocationInfo.put("lon", Double.toString(3213) );
-//        mLocationInfo.put("lat", Double.toString(2312) );
-//        places.put("McDonald", mLocationInfo);
-//        mUserLocationListRef.setValue(places);
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
 
         // TODO: this listener should be global to any acitivity
 //        mPartnerRef    = Utils.sFirebaseRoot.orderByChild(mPartnerNumber);
@@ -97,50 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(final LatLng point) {
         createAddDialog(point);
-    }
-
-    public void saveFavoriteLocation(FavoriteLocation favoriteLocation) {
-        SharedPreferences.Editor editor = sharedPrefs.edit();
-
-        editor.putInt("numLocations", favoriteLocations.size());
-
-        // index of last element (marker just added)
-        int i = favoriteLocations.size() - 1;
-        editor.putFloat("lat" + i, (float) favoriteLocation.getLocation().latitude);
-        editor.putFloat("lon" + i, (float) favoriteLocation.getLocation().longitude);
-        editor.putString("title" + i, favoriteLocation.getTitle());
-
-        editor.commit();
-
-        favoriteLocations.add(favoriteLocation);
-    }
-
-    private void saveFavoriteLocationFirebase(FavoriteLocation favoriteLocation) {
-        String key = favoriteLocation.getTitle();
-        Firebase key_place = mUserLocationListRef.child(key);
-
-        mLocationInfo.put("lon", Double.toString(favoriteLocation.getLocation().longitude) );
-        mLocationInfo.put("lat", Double.toString(favoriteLocation.getLocation().latitude) );
-        places.put(key, mLocationInfo);
-        mUserLocationListRef.setValue(places);
-    }
-
-    public void loadFavoriteLocations() {
-        // load the saved locations
-        int numLocations = sharedPrefs.getInt("numLocations", 0);
-        if (numLocations > 0) {
-            for (int i = 0; i < numLocations; i++) {
-                double lat = (double) sharedPrefs.getFloat("lat" + i, 0);
-                double lon = (double) sharedPrefs.getFloat("lon" + i, 0);
-                String title = sharedPrefs.getString("title" + i, "NULL");
-
-                FavoriteLocation favoriteLocation = new FavoriteLocation(title,
-                        new LatLng(lat, lon));
-                favoriteLocation.addToGoogleMap(mMap);
-
-                favoriteLocations.add(favoriteLocation);
-            }
-        }
     }
 
     /**
@@ -165,8 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         FavoriteLocation favoriteLocation = new FavoriteLocation(title, point);
                         favoriteLocation.addToGoogleMap(mMap);
 
-                        saveFavoriteLocation(favoriteLocation);
-                        saveFavoriteLocationFirebase(favoriteLocation);
+                        locations.addLocation(favoriteLocation);
                     }
                 });
 
@@ -190,10 +152,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        favoriteLocations = new ArrayList<>();
-
         sharedPrefs = getSharedPreferences("location", 0);
-        loadFavoriteLocations();
+
+        locations = new LocationList(sharedPrefs,
+                Utils.sFirebaseRoot.child(mUserNumber).child(LOC_LIST));
+        locations.loadFromSharedPrefs(mMap);
 
         // define listener
         LocationListener locationListener = new LocationListener() {
@@ -202,7 +165,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
 
                 // check if you're close to a location here and send notification upstream
-                for (FavoriteLocation favoriteLocation : favoriteLocations) {
+                for (FavoriteLocation favoriteLocation : locations.getLocations()) {
                     if (favoriteLocation != lastVisitedLocation) {
                         float distance = favoriteLocation.distanceTo(position);
 
@@ -210,8 +173,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (distance < NOTIFICATION_DISTANCE) {
                             lastVisitedLocation = favoriteLocation;
 
-                            sendMessage(mPartnerNumber, "Your partner visited location " +
-                                    favoriteLocation.getTitle());
+                            String msg = "Your partner visited location " + favoriteLocation.getTitle();
+
+                            //Notification notification = new SMSNotification(mPartnerNumber, msg);
+                            Notification notification = new FirebaseNotification(mPartnerRef, msg);
+                            notification.send();
 
                             Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                             // VIbrate for 500 ms
@@ -272,11 +238,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
-
-    private void sendMessage(String num, String msg) {
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(num, null, msg, null, null);
-    }
-
-
 }

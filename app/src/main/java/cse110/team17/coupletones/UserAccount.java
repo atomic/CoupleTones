@@ -12,26 +12,25 @@ import java.util.ArrayList;
  * Created by Tony Lim on 5/8/16.
  * UserAccoutn is a class to represent informations about the user of the App. These include the
  * name of the user, list of locations, and partner's phone number, regID or email
+ * Singleton class
  */
 public class UserAccount {
 
-    private String mUsername;
-    private String mUserEmail;
-    private String mUserPhone;
+    private static String TAG = "UserAccount";
 
-    private boolean hasPartner;
-    private String mPartnerEmail;
-    private String mPartnerRegId;
-    private String mPartnerPhone;
+    private static String mUserPhone;
+
+    private static boolean hasPartner = false;
+    private static String mPartnerPhone;
 
     /**
      * favorite places that contains Markers.
      * data is public for easier retrieval
      */
-    public ArrayList<Marker> mFavoritePlaces;
+    public static ArrayList<Marker> mFavoritePlaces;
 
     public UserAccount(){
-        hasPartner = false;
+        Log.d(TAG, "Error: UserAccount should not be instantiated");
     }
 
 
@@ -40,7 +39,7 @@ public class UserAccount {
      * @param partnerPhone : partner's phone number
      * @return boolean to represent whether a partner already added or not
      */
-    public boolean addPartner(final String partnerPhone)
+    public static boolean addPartner(final String partnerPhone)
     {
         if( hasPartner) return false;
         hasPartner = true;
@@ -53,52 +52,25 @@ public class UserAccount {
      * Add new favorite place to user's
      * @param favoritePlace : Marker for favorite place
      */
-    public void addFavoritePlace(Marker favoritePlace)
+    public static void addFavoritePlace(Marker favoritePlace)
     {
         mFavoritePlaces.add(favoritePlace);
     }
 
-
     /**
      * Getter for member variables
      */
-    public String getPartnerPhone() {
+    public static String getPartnerPhone() {
         return mPartnerPhone;
     }
 
-    public String getUsername() {
-        return mUsername;
-    }
-
-    public String getUserEmail() {
-        return mUserEmail;
-    }
-
-    public String getPartnerEmail() {
-        return mPartnerEmail;
-    }
-
-    public String getPartnerRegId() {
-        return mPartnerRegId;
-    }
-
-    public void setPartnerEmail(String partnerEmail) {
-        mPartnerEmail = partnerEmail;
-    }
-
-    public void setUsername(String username) {
-        mUsername = username;
-    }
-
-    public void setUserEmail(String userEmail) {
-        mUserEmail = userEmail;
-    }
-
-    public void setUserPhone(String userPhone) {
+    public static void setUserPhone(String userPhone) {
         mUserPhone = userPhone;
+        // TODO: check if firebase have the location lists for this number
+
     }
 
-    public String getUserPhone() {
+    public static String getUserPhone() {
         return mUserPhone;
     }
 }

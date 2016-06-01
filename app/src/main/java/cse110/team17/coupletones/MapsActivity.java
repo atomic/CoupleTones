@@ -46,15 +46,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     // where to start the map by default
     private static final LatLng DEFAULT_LOCATION = new LatLng(40, -100);
 
-    public static final String EXTRA_GET_USER = "cse110.team16.coupletones.user";
-    public static final String EXTRA_GET_PARTNER_PHONE = "cse110.team16.coupletones.partner_phone";
-
     private GoogleMap mMap;
     private SharedPreferences sharedPrefs;
 
     private ArrayList<FavoriteLocation> favoriteLocations;
     private FavoriteLocation lastVisitedLocation;
 
+    private String mUserNumber;
     private String mPartnerNumber;
 
     @Override
@@ -67,12 +65,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         // Getting partner's number from previous activity
-        mPartnerNumber = getIntent().getStringExtra(EXTRA_GET_PARTNER_PHONE);
+        mPartnerNumber = UserAccount.getPartnerPhone();
+        mUserNumber    = UserAccount.getUserPhone();
+
+        Log.d(TAG, "user number : " + mUserNumber);
         Log.d(TAG, "partner number : " + mPartnerNumber);
 
         // TODO: use this push to do something else,
-        Utils.mFirebaseRef.child("coupletones").setValue("Going in to MapActivity");
-        // Test send something to Firebase (TODO: extends)
+        Utils.mFirebaseRef.child(mPartnerNumber).setValue(mUserNumber + " connected to partner : " + mPartnerNumber);
     }
 
     @Override
@@ -248,11 +248,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         smsManager.sendTextMessage(num, null, msg, null, null);
     }
 
-
-    public static Intent newIntent(Context packageContext, String partnerNumber) {
-        Intent i = new Intent(packageContext, MapsActivity.class);
-        i.putExtra(EXTRA_GET_PARTNER_PHONE, partnerNumber);
-        return i;
-    }
 
 }

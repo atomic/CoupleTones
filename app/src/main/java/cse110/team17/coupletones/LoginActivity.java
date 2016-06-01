@@ -31,15 +31,8 @@ public class LoginActivity extends AppCompatActivity  {
     // UI references.
     private AutoCompleteTextView mPhoneView;
 
-//    private Button mButtonRegisterId;
     private Button mButtonSignIn;           // This button is used to sign in/ or sign up for now
     private Button mButtonSignPartner;
-
-
-    private UserAccount mUserAccount;
-
-    private Constants.State mState          = Constants.State.UNREGISTERED;
-    private Constants.State mStatePartner   = Constants.State.UNREGISTERED;
 
 
     @Override
@@ -47,10 +40,9 @@ public class LoginActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-//        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         mPhoneView = (AutoCompleteTextView) findViewById(R.id.phone_number);
 
-        mUserAccount = new UserAccount();
+//        mUserAccount = new UserAccount();
 
         mButtonSignIn = (Button) findViewById(R.id.sign_in_button);
         mButtonSignIn.setOnClickListener(new OnClickListener() {
@@ -77,6 +69,8 @@ public class LoginActivity extends AppCompatActivity  {
                     mButtonSignPartner.setEnabled(false);
                     Toast.makeText(LoginActivity.this, "Partner registered", Toast.LENGTH_SHORT).show();
 
+                    // TODO: move this to other activity that handles location list, set tone, map view
+
                     Utils.delay(2, new Utils.DelayCallback() {
                         @Override
                         public void afterDelay() {
@@ -90,10 +84,9 @@ public class LoginActivity extends AppCompatActivity  {
                         }
                     });
 
-                    Intent i = MapsActivity.newIntent(LoginActivity.this, mUserAccount.getPartnerPhone());
-                    // TODO: putExtra on user's phone number (firebase will push to this path
+                    Intent i = new Intent(LoginActivity.this, MapsActivity.class);
 
-                    Log.d(LOGIN, "partner phone (before starting Map): " + mUserAccount.getPartnerPhone());
+                    Log.d(LOGIN, "partner phone (before starting Map): " + UserAccount.getPartnerPhone());
                     startActivity(i);
 
                 }
@@ -103,9 +96,8 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     private boolean registerPartner() {
-        // TODO: make sure firebase has updated children path
         String partnerPhone = mPhoneView.getText().toString();
-        mUserAccount.addPartner(partnerPhone);
+        UserAccount.addPartner(partnerPhone);
         return true;
     }
 
@@ -118,7 +110,7 @@ public class LoginActivity extends AppCompatActivity  {
         String phone = mPhoneView.getText().toString();
         if(phone.isEmpty())
             return false; // for now Phone is more important
-        mUserAccount.setUserPhone(phone);
+        UserAccount.setUserPhone(phone);
         return true;
     }
 

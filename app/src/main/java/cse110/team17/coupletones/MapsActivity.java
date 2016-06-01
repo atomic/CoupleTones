@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -181,6 +182,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             sendMessage(mPartnerNumber, "Your partner visited location " +
                                     favoriteLocation.getTitle());
+
+                            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                            // VIbrate for 500 ms
+                            v.vibrate(500);
                         }
                     }
                 }

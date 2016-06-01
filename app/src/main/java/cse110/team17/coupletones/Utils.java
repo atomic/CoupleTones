@@ -10,7 +10,7 @@ import com.firebase.client.Firebase;
 public class Utils {
 
     // Delay mechanism
-    public static Firebase mFirebaseRef = new Firebase("https://vivid-inferno-5451.firebaseio.com/");
+    public static Firebase sFirebaseRoot = new Firebase("https://vivid-inferno-5451.firebaseio.com/");
     // TODO: find a way to store GPX on firebase and make it singleton here
 
 

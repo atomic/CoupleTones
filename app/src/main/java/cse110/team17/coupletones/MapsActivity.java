@@ -3,7 +3,6 @@ package cse110.team17.coupletones;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -19,24 +18,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.firebase.client.Firebase;
+import com.firebase.client.Query;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
     private static final String TAG = "MapsActivity";
+
+    String LOC_LIST ="LocationList"; // used to populated children of firebase with this thing
+    String USER_NEAR="UserNear";       // store name of the place user approached, used in firebase
+
 
     private static final float DEFAULT_ZOOM = 15.0f;
 
@@ -55,6 +57,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String mUserNumber;
     private String mPartnerNumber;
 
+    Map<String, String> mLocationInfo = new HashMap<String, String>();
+    Map<String, Map<String, String>> places = new HashMap<String, Map<String, String>>();
+
+    Firebase    mUserLocationListRef;
+    Firebase    mUserNearLocation;
+    Query       mPartnerRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,11 +77,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mPartnerNumber = UserAccount.getPartnerPhone();
         mUserNumber    = UserAccount.getUserPhone();
 
-        Log.d(TAG, "user number : " + mUserNumber);
-        Log.d(TAG, "partner number : " + mPartnerNumber);
+        mUserLocationListRef = Utils.sFirebaseRoot.child(mUserNumber).child(LOC_LIST);
+        mUserNearLocation    = Utils.sFirebaseRoot.child(mUserNumber).child(USER_NEAR);
 
-        // TODO: use this push to do something else,
-        Utils.mFirebaseRef.child(mPartnerNumber).setValue(mUserNumber + " connected to partner : " + mPartnerNumber);
+
+//        mLocationInfo.put("lon", Double.toString(123123) );
+//        mLocationInfo.put("lat", Double.toString(999999) );
+//        places.put("Chipotle", mLocationInfo);
+//        mLocationInfo.put("lon", Double.toString(3213) );
+//        mLocationInfo.put("lat", Double.toString(2312) );
+//        places.put("McDonald", mLocationInfo);
+//        mUserLocationListRef.setValue(places);
+
+        // TODO: this listener should be global to any acitivity
+//        mPartnerRef    = Utils.sFirebaseRoot.orderByChild(mPartnerNumber);
+
     }
 
     @Override
@@ -94,6 +113,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         editor.commit();
 
         favoriteLocations.add(favoriteLocation);
+    }
+
+    private void saveFavoriteLocationFirebase(FavoriteLocation favoriteLocation) {
+        String key = favoriteLocation.getTitle();
+        Firebase key_place = mUserLocationListRef.child(key);
+
+        mLocationInfo.put("lon", Double.toString(favoriteLocation.getLocation().longitude) );
+        mLocationInfo.put("lat", Double.toString(favoriteLocation.getLocation().latitude) );
+        places.put(key, mLocationInfo);
+        mUserLocationListRef.setValue(places);
     }
 
     public void loadFavoriteLocations() {
@@ -137,6 +166,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         favoriteLocation.addToGoogleMap(mMap);
 
                         saveFavoriteLocation(favoriteLocation);
+                        saveFavoriteLocationFirebase(favoriteLocation);
                     }
                 });
 

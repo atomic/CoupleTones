@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_partner_locations"
+        android:orderInCategory="1"
+        android:title="@string/partner_s_locations"/>
+    <item
+        android:id="@+id/menu_visited_locations"
+        android:orderInCategory="2"
+        android:title="@string/visited_locations"/>
+</menu>

@@ -3,6 +3,7 @@ package cse110.team17.coupletones;
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,10 +13,13 @@ import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -31,11 +35,19 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+public class MapsActivity extends ActionBarActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
 
     private static final String TAG = "MapsActivity";
@@ -64,6 +76,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Firebase    mUserNearLocation;
     Firebase    mPartnerRef;
 
+    // list of partner locations
+    public static HashMap<String, FavoriteLocation> partnerLocations = new HashMap<>();
+
+    // ordered list of locations partner visited, sorted by time visited
+    public static ArrayDeque<FavoriteLocation> visitedPartnerLocations = new ArrayDeque<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +103,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String data = dataSnapshot.getValue(String.class);
                 if (data != null && !data.isEmpty()) {
-                    Toast.makeText(MapsActivity.this, data, Toast.LENGTH_LONG).show();
+                    Toast.makeText(MapsActivity.this, "Your partner visited location " + data,
+                            Toast.LENGTH_LONG).show();
                     mUserNearLocation.setValue("");
+
+                    FavoriteLocation visitedLocation = partnerLocations.get(data);
+
+                    // add most recently visited location to front of deque
+                    visitedPartnerLocations.remove(visitedLocation);
+                    visitedPartnerLocations.addFirst(visitedLocation);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
+        Firebase partnerLocationsRef = Utils.sFirebaseRoot.child(mPartnerNumber).child(LOC_LIST);
+        partnerLocationsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, HashMap<String, String>> places = new HashMap<>();
+                places = dataSnapshot.getValue(places.getClass());
+                if (places != null) {
+                    Log.d("firebase", "partner added new location: " + places.toString());
+                    for (Map.Entry<String, HashMap<String, String>> entry : places.entrySet()) {
+                        String title = entry.getKey();
+                        if (!partnerLocations.containsKey(title)) {
+                            LatLng location = new LatLng(Double.parseDouble(entry.getValue().get("lat")),
+                                    Double.parseDouble(entry.getValue().get("lon")));
+                            partnerLocations.put(title, new FavoriteLocation(title, location));
+                        }
+                    }
                 }
             }
 
@@ -165,7 +215,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
 
                 // check if you're close to a location here and send notification upstream
-                for (FavoriteLocation favoriteLocation : locations.getLocations()) {
+                for (FavoriteLocation favoriteLocation : locations.getLocations().values()) {
                     if (favoriteLocation != lastVisitedLocation) {
                         float distance = favoriteLocation.distanceTo(position);
 
@@ -173,7 +223,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         if (distance < NOTIFICATION_DISTANCE) {
                             lastVisitedLocation = favoriteLocation;
 
-                            String msg = "Your partner visited location " + favoriteLocation.getTitle();
+                            String msg = favoriteLocation.getTitle();
 
                             //Notification notification = new SMSNotification(mPartnerNumber, msg);
                             Notification notification = new FirebaseNotification(mPartnerRef, msg);
@@ -237,5 +287,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         mMap.getUiSettings().setZoomControlsEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maps_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_partner_locations:
+                Intent i = new Intent(MapsActivity.this, PartnerLocationActivity.class);
+                startActivity(i);
+                return true;
+            case R.id.menu_visited_locations:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

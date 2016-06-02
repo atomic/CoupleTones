@@ -14,7 +14,8 @@ import java.util.Map;
  * Created by tylersy on 6/1/16.
  */
 public class LocationList {
-    private ArrayList<FavoriteLocation> favoriteLocations = new ArrayList<>();
+    //private ArrayList<FavoriteLocation> favoriteLocations = new ArrayList<>();
+    private Map<String, FavoriteLocation> favoriteLocations = new HashMap<>();
     Map<String, String> mLocationInfo = new HashMap<>();
     Map<String, Map<String, String>> places = new HashMap<>();
 
@@ -28,7 +29,8 @@ public class LocationList {
     }
 
     public void addLocation(FavoriteLocation favoriteLocation) {
-        favoriteLocations.add(favoriteLocation);
+        //favoriteLocations.add(favoriteLocation);
+        favoriteLocations.put(favoriteLocation.getTitle(), favoriteLocation);
         saveToSharedPrefs(favoriteLocation);
         saveToFirebase(favoriteLocation);
     }
@@ -46,12 +48,18 @@ public class LocationList {
                         new LatLng(lat, lon));
                 favoriteLocation.addToGoogleMap(mMap);
 
-                favoriteLocations.add(favoriteLocation);
+                favoriteLocations.put(favoriteLocation.getTitle(), favoriteLocation);
+
+                mLocationInfo.put("lon", Double.toString(favoriteLocation.getLocation().longitude) );
+                mLocationInfo.put("lat", Double.toString(favoriteLocation.getLocation().latitude) );
+                places.put(favoriteLocation.getTitle(), mLocationInfo);
             }
+
+            mUserLocationListRef.setValue(places);
         }
     }
 
-    public ArrayList<FavoriteLocation> getLocations() {
+    public Map<String, FavoriteLocation> getLocations() {
         return favoriteLocations;
     }
 
@@ -71,7 +79,6 @@ public class LocationList {
 
     private void saveToFirebase(FavoriteLocation favoriteLocation) {
         String key = favoriteLocation.getTitle();
-        Firebase key_place = mUserLocationListRef.child(key);
 
         mLocationInfo.put("lon", Double.toString(favoriteLocation.getLocation().longitude) );
         mLocationInfo.put("lat", Double.toString(favoriteLocation.getLocation().latitude) );

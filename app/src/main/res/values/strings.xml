@@ -20,4 +20,6 @@
     <string name="prompt_phone">Phone Number</string>
     <string name="action_sign_phone">Sign Phone</string>
     <string name="register_partner">Sign Partner</string>
+    <string name="partner_s_locations">Partner\'s locations</string>
+    <string name="visited_locations">Visited locations</string>
 </resources>

@@ -297,12 +297,15 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent i;
         switch (item.getItemId()) {
             case R.id.menu_partner_locations:
-                Intent i = new Intent(MapsActivity.this, PartnerLocationActivity.class);
+                i = new Intent(MapsActivity.this, PartnerLocationActivity.class);
                 startActivity(i);
                 return true;
             case R.id.menu_visited_locations:
+                i = new Intent(MapsActivity.this, VisitedLocationActivity.class);
+                startActivity(i);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -2,6 +2,7 @@ package cse110.team17.coupletones;
 
 import android.location.Location;
 import android.media.Ringtone;
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -19,6 +20,7 @@ public class FavoriteLocation {
     private String title;
     private LatLng location;
     private Ringtone tone;
+    private Uri uri;
 
     public FavoriteLocation(String title, LatLng location) {
         this.title = title;
@@ -53,6 +55,14 @@ public class FavoriteLocation {
 
     public Ringtone getTone() {
         return tone;
+    }
+
+    public void setUri(Uri uri) {
+        this.uri = uri;
+    }
+
+    public Uri getUri() {
+        return uri;
     }
 }
 

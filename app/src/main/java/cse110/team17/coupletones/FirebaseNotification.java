@@ -5,6 +5,7 @@ import com.firebase.client.Firebase;
 /**
  * Created by tylersy on 6/1/16.
  */
+// notification class using observer and strategy patterns
 public class FirebaseNotification implements Notification {
     private final String msg;
     Firebase partnerRef;

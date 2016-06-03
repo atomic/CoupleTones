@@ -46,11 +46,20 @@ public class PartnerLocationActivity extends AppCompatActivity {
         partnerLocationsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Uri uri = null;
+
+                String entry = list.get(position);
+                String title = entry.substring(0, entry.indexOf(":"));
+                FavoriteLocation favoriteLocation = MapsActivity.partnerLocations.get(title);
+                if (favoriteLocation != null) {
+                    uri = favoriteLocation.getUri();
+                }
+
                 requests.add(position);
                 Intent i = new Intent(RingtoneManager.ACTION_RINGTONE_PICKER);
                 i.putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_NOTIFICATION);
                 i.putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Select Tone");
-                i.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, (Uri) null);
+                i.putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, uri);
                 startActivityForResult(i, position);
             }
         });
@@ -68,7 +77,10 @@ public class PartnerLocationActivity extends AppCompatActivity {
             Ringtone tone = RingtoneManager.getRingtone(getApplicationContext(), uri);
 
             FavoriteLocation favoriteLocation = MapsActivity.partnerLocations.get(title);
-            if (favoriteLocation != null) favoriteLocation.setTone(tone);
+            if (favoriteLocation != null) {
+                favoriteLocation.setTone(tone);
+                favoriteLocation.setUri(uri);
+            }
         }
     }
 }

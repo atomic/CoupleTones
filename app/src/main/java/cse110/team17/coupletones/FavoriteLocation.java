@@ -1,6 +1,7 @@
 package cse110.team17.coupletones;
 
 import android.location.Location;
+import android.media.Ringtone;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -14,20 +15,14 @@ import java.io.Serializable;
 /**
  * Created by tylersy on 5/8/16.
  */
-public class FavoriteLocation implements Parcelable {
+public class FavoriteLocation {
     private String title;
     private LatLng location;
+    private Ringtone tone;
 
     public FavoriteLocation(String title, LatLng location) {
         this.title = title;
         this.location = location;
-    }
-
-    public FavoriteLocation(Parcel p) {
-        title = p.readString();
-        double lat = p.readLong();
-        double lon = p.readLong();
-        location = new LatLng(lat, lon);
     }
 
     public void addToGoogleMap(GoogleMap map) {
@@ -52,26 +47,12 @@ public class FavoriteLocation implements Parcelable {
         return results[0];
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
+    public void setTone(Ringtone tone) {
+        this.tone = tone;
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title);
-        dest.writeDouble(location.latitude);
-        dest.writeDouble(location.longitude);
+    public Ringtone getTone() {
+        return tone;
     }
-
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public FavoriteLocation createFromParcel(Parcel in) {
-            return new FavoriteLocation(in);
-        }
-
-        public FavoriteLocation[] newArray(int size) {
-            return new FavoriteLocation[size];
-        }
-    };
 }
 

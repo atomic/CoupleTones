@@ -1,6 +1,7 @@
 package cse110.team17.coupletones;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,10 +10,12 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Ringtone;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
@@ -39,6 +42,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -103,8 +107,21 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String data = dataSnapshot.getValue(String.class);
                 if (data != null && !data.isEmpty()) {
-                    Toast.makeText(MapsActivity.this, "Your partner visited location " + data,
-                            Toast.LENGTH_LONG).show();
+                    //Toast.makeText(MapsActivity.this, "Your partner visited location " + data,
+                    //        Toast.LENGTH_LONG).show();
+
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(getApplicationContext())
+                            .setSmallIcon(R.drawable.ic_setting_light)
+                            .setContentTitle("CoupleTones")
+                            .setContentText("Your partner visited location " + data);
+
+                    Date now = new Date();
+                    NotificationManager mNotificationManager =
+                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.notify((int) (now.getTime() % Integer.MAX_VALUE),
+                            mBuilder.build());
+
                     mUserNearLocation.setValue("");
 
                     FavoriteLocation visitedLocation = partnerLocations.get(data);
@@ -112,6 +129,9 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                     // add most recently visited location to front of deque
                     visitedPartnerLocations.remove(visitedLocation);
                     visitedPartnerLocations.addFirst(visitedLocation);
+
+                    Ringtone tone = visitedLocation.getTone();
+                    if (tone != null) tone.play();
                 }
             }
 

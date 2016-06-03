@@ -1,11 +1,6 @@
 package cse110.team17.coupletones;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -14,8 +9,6 @@ import android.view.View.OnClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
-
-import java.io.IOException;
 
 /**
  * A login screen that offers login via email/password.
@@ -27,6 +20,7 @@ public class LoginActivity extends AppCompatActivity  {
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
+    private static final String TAG = "LoginActivity";
 
     // UI references.
     private AutoCompleteTextView mPhoneView;
@@ -68,31 +62,24 @@ public class LoginActivity extends AppCompatActivity  {
                     mPhoneView.setEnabled(false);
                     mButtonSignPartner.setEnabled(false);
                     Toast.makeText(LoginActivity.this, "Partner registered", Toast.LENGTH_SHORT).show();
-
-                    // TODO: move this to other activity that handles location list, set tone, map view
-
                     Utils.delay(2, new Utils.DelayCallback() {
                         @Override
                         public void afterDelay() {
                             Toast.makeText(LoginActivity.this, "Showing Map..", Toast.LENGTH_SHORT).show();
                         }
                     });
-
                     Utils.delay(1, new Utils.DelayCallback() {
                         @Override
                         public void afterDelay() {
                         }
                     });
-
                     Intent i = new Intent(LoginActivity.this, MapsActivity.class);
-
                     Log.d(LOGIN, "partner phone (before starting Map): " + UserAccount.getPartnerPhone());
                     startActivity(i);
 
                 }
             }
         });
-
     }
 
     private boolean registerPartner() {
@@ -113,6 +100,5 @@ public class LoginActivity extends AppCompatActivity  {
         UserAccount.setUserPhone(phone);
         return true;
     }
-
 }
 

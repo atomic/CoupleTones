@@ -11,11 +11,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Vibrator;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
-import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,7 +25,6 @@ import android.widget.Toast;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
-import com.firebase.client.Query;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,16 +33,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
 public class MapsActivity extends ActionBarActivity implements OnMapReadyCallback,
         GoogleMap.OnMapLongClickListener{
@@ -308,7 +297,7 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 startActivity(i);
                 return true;
             case R.id.menu_set_location_tone:
-                i = new Intent(MapsActivity.this, SetPartnerLocationToneActivity.class);
+                i = new Intent(MapsActivity.this, SetToneActivity.class);
                 startActivity(i);
                 return true;
             default:

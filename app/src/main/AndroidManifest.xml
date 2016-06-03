@@ -58,9 +58,9 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"/>
         <activity android:name=".PartnerLocationActivity"/>
+        <activity android:name=".SetPartnerLocationToneActivity"/>
         <activity android:name=".VisitedLocationActivity"/>
-        <activity android:name=".MenuActivity">
-        </activity>
+        <activity android:name=".MenuActivity"/>
     </application>
 
 </manifest>

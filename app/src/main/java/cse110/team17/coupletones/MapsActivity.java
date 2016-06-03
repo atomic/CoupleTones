@@ -307,6 +307,10 @@ public class MapsActivity extends ActionBarActivity implements OnMapReadyCallbac
                 i = new Intent(MapsActivity.this, VisitedLocationActivity.class);
                 startActivity(i);
                 return true;
+            case R.id.menu_set_location_tone:
+                i = new Intent(MapsActivity.this, SetPartnerLocationToneActivity.class);
+                startActivity(i);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

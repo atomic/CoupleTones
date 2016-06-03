@@ -8,4 +8,11 @@
         android:id="@+id/menu_visited_locations"
         android:orderInCategory="2"
         android:title="@string/visited_locations"/>
+
+
+    // This third item doesnt show, not sure why
+    <item
+        android:id="@+id/menu_set_location_tone"
+        android:orderInCategory="3"
+        android:title="@string/set_location_tone"/>
 </menu>
